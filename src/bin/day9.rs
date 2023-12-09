@@ -10,7 +10,7 @@ fn parse_input() -> Vec<Vec<i64>> {
 }
 
 fn extrapolate((sum_end, sum_start): (i64, i64), v: &Vec<i64>) -> (i64, i64) {
-    let mut curr = v.clone();
+    let mut curr = v.to_owned();
     let mut running_sum_end = 0;
     let mut running_sum_start = 0;
     let mut sign = 1;
@@ -20,9 +20,8 @@ fn extrapolate((sum_end, sum_start): (i64, i64), v: &Vec<i64>) -> (i64, i64) {
         sign *= -1;
         curr = curr
             .iter()
-            .enumerate()
-            .skip(1)
-            .map(|(idx, num)| num - curr[idx - 1])
+            .zip(curr.iter().skip(1))
+            .map(|(num, next)| next - num)
             .collect::<Vec<_>>();
     }
     (sum_end + running_sum_end, sum_start + running_sum_start)
