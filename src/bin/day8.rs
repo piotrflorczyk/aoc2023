@@ -61,7 +61,7 @@ fn p1() {
         &map,
         &dir,
     );
-    println!("steps: {steps}");
+    println!("p1 steps: {steps}");
 }
 
 fn p2() {
@@ -74,9 +74,9 @@ fn p2() {
 
     let steps = starts
         .map(|node| find_path(node, &ends, &map, &dir))
-        .fold(1, |acc, distance| lcm(acc, distance));
+        .fold(1, lcm);
 
-    println!("{steps:?}");
+    println!("p2 steps: {steps:?}");
 }
 
 fn main() {

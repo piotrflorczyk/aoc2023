@@ -5,7 +5,7 @@ use std::convert::From;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 enum Card {
-    SpotCard(u8),
+    Spot(u8),
     Jack,
     Queen,
     King,
@@ -16,7 +16,7 @@ enum Card {
 impl Card {
     fn get_rank(&self) -> u8 {
         match self {
-            Card::SpotCard(x) => *x,
+            Card::Spot(x) => *x,
             Card::Jack => 11,
             Card::Queen => 12,
             Card::King => 13,
@@ -29,9 +29,9 @@ impl Card {
 impl From<char> for Card {
     fn from(card: char) -> Self {
         card.to_digit(10)
-            .map(|v| Card::SpotCard(v as u8))
+            .map(|v| Card::Spot(v as u8))
             .unwrap_or_else(|| match card {
-                'T' => Card::SpotCard(10),
+                'T' => Card::Spot(10),
                 'J' => Card::Jack,
                 'Q' => Card::Queen,
                 'K' => Card::King,
@@ -118,7 +118,7 @@ impl PartialOrd for Hand {
     }
 }
 
-fn calc_score(hands: &Vec<Hand>) -> usize {
+fn calc_score(hands: &[Hand]) -> usize {
     hands
         .iter()
         .enumerate()
