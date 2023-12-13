@@ -1,12 +1,12 @@
 use std::cmp;
 
-fn compare_rows(idxa: usize, idxb: usize, grid: &Vec<Vec<char>>) -> i32 {
+fn compare_rows(idxa: usize, idxb: usize, grid: &[Vec<char>]) -> i32 {
     (0..grid[0].len()).fold(0, |acc, i| {
         acc + (grid[idxa][i] as i32 - grid[idxb][i] as i32).abs()
     })
 }
 
-fn compare_cols(idxa: usize, idxb: usize, grid: &Vec<Vec<char>>) -> i32 {
+fn compare_cols(idxa: usize, idxb: usize, grid: &[Vec<char>]) -> i32 {
     (0..grid.len()).fold(0, |acc, i| {
         acc + (grid[i][idxa] as i32 - grid[i][idxb] as i32).abs()
     })
@@ -23,7 +23,7 @@ fn load_input() -> Vec<Vec<Vec<char>>> {
         .collect::<Vec<_>>()
 }
 
-fn calculate_reflections(grids: &Vec<Vec<Vec<char>>>, difference: i32) -> usize {
+fn calculate_reflections(grids: &[Vec<Vec<char>>], difference: i32) -> usize {
     grids.iter().fold(0, |acc, grid| {
         let row_reflection = (1..grid.len()).find(|&i| {
             let reflection_size = cmp::min(i, grid.len() - i);

@@ -91,6 +91,52 @@ fn calc_ways(
     *cache.get(&(data_idx, group_idx)).unwrap_or(&0)
 }
 
+fn calc_ways_dp(puzzle: &PuzzleInput) -> usize {
+    // format (input_idx, group_idx, group_cnt)
+    let max_grp_cnt = puzzle.groups.iter().max().unwrap();
+    let mut dp =
+        vec![vec![vec![0; max_grp_cnt + 2]; puzzle.groups.len() + 2]; puzzle.data.len() + 2];
+
+    dp[puzzle.data.len()][puzzle.groups.len()][0] = 1;
+    dp[puzzle.data.len()][puzzle.groups.len() - 1][puzzle.groups[puzzle.groups.len() - 1]] = 1;
+
+    for data_idx in (0..puzzle.data.len()).rev() {
+        for group_idx in (0..puzzle.groups.len() + 1).rev() {
+            let range = if group_idx < puzzle.groups.len() {
+                puzzle.groups[group_idx]
+            } else {
+                puzzle.groups[puzzle.groups.len() - 1]
+            };
+            for group_cnt in (0..range + 1).rev() {
+                match puzzle.data.as_bytes()[data_idx] {
+                    b'.' if group_cnt == range => {
+                        dp[data_idx][group_idx][group_cnt] = dp[data_idx + 1][group_idx + 1][0];
+                    }
+                    b'.' if group_cnt == 0 => {
+                        dp[data_idx][group_idx][group_cnt] = dp[data_idx + 1][group_idx][0];
+                    }
+                    b'#' => {
+                        dp[data_idx][group_idx][group_cnt] =
+                            dp[data_idx + 1][group_idx][group_cnt + 1];
+                    }
+                    b'?' => {
+                        let mut val = 0;
+                        if group_cnt == range {
+                            val += dp[data_idx + 1][group_idx + 1][0]
+                        } else if group_cnt == 0 {
+                            val += dp[data_idx + 1][group_idx][0];
+                        }
+                        val += dp[data_idx + 1][group_idx][group_cnt + 1];
+                        dp[data_idx][group_idx][group_cnt] = val;
+                    }
+                    _ => (),
+                }
+            }
+        }
+    }
+    dp[0][0][0]
+}
+
 fn p1() {
     let puzzles = include_str!("../../input/day12")
         .lines()
@@ -119,7 +165,17 @@ fn p2() {
     println!("p2: {ways}");
 }
 
+fn p1_p2_dp() {
+    let puzzles = include_str!("../../input/day12")
+        .lines()
+        .map(PuzzleInput::from_p2)
+        .collect::<Vec<_>>();
+    let ways = puzzles.iter().map(calc_ways_dp).sum::<usize>();
+    println!("dp: {ways:?}");
+}
+
 fn main() {
     p1();
     p2();
+    p1_p2_dp();
 }
