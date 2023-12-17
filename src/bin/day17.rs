@@ -1,5 +1,5 @@
 use std::cmp::Ordering;
-use std::collections::BinaryHeap;
+use std::collections::{BinaryHeap, HashSet};
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u8)]
@@ -67,7 +67,7 @@ fn is_valid(pos: (i32, i32), grid: &Vec<Vec<u32>>) -> bool {
 
 fn find_path(grid: &Vec<Vec<u32>>, min_moves: u8, max_moves: u8) -> Path {
     let mut heap = BinaryHeap::new();
-    let mut visited = vec![vec![0u64; grid[0].len()]; grid.len()];
+    let mut visited_set = HashSet::new();
     heap.push(Path {
         cost: 0,
         pos: (0, 0),
@@ -78,48 +78,34 @@ fn find_path(grid: &Vec<Vec<u32>>, min_moves: u8, max_moves: u8) -> Path {
         if path.pos.0 == grid.len() as i32 - 1 && path.pos.1 == grid[0].len() as i32 - 1 {
             return path;
         }
-
-        let compressed_dir = (path.dir as u64) << (4 * (path.dir_cnt - min_moves));
-        if visited[path.pos.0 as usize][path.pos.1 as usize] & compressed_dir == 0 {
-            visited[path.pos.0 as usize][path.pos.1 as usize] |= compressed_dir;
+        if !visited_set.contains(&(path.pos, path.dir as u8, path.dir_cnt)) {
+            visited_set.insert((path.pos, path.dir as u8, path.dir_cnt));
             [Dir::Up, Dir::Down, Dir::Left, Dir::Right]
                 .iter()
                 .for_each(|&next_dir| {
-                    if path.dir == next_dir && path.dir_cnt != max_moves {
-                        let new_pos = (
-                            path.pos.0 + next_dir.row_inc(),
-                            path.pos.1 + next_dir.col_inc(),
-                        );
-                        if is_valid(new_pos, grid) {
-                            heap.push(Path {
-                                cost: path.cost + grid[new_pos.0 as usize][new_pos.1 as usize],
-                                pos: new_pos,
-                                dir: next_dir,
-                                dir_cnt: path.dir_cnt + 1,
-                            })
-                        }
-                    }
                     if next_dir != path.dir.oposite() && next_dir != path.dir {
-                        let new_pos = (
-                            path.pos.0 + next_dir.row_inc() * (min_moves as i32),
-                            path.pos.1 + next_dir.col_inc() * (min_moves as i32),
-                        );
-                        if is_valid(new_pos, grid) {
-                            heap.push(Path {
-                                cost: path.cost
-                                    + (1..min_moves + 1)
-                                        .map(|i| {
-                                            grid[(path.pos.0 + next_dir.row_inc() * i as i32)
-                                                as usize]
-                                                [(path.pos.1 + next_dir.col_inc() * i as i32)
+                        (min_moves..max_moves + 1).for_each(|moves| {
+                            let new_pos = (
+                                path.pos.0 + next_dir.row_inc() * (moves as i32),
+                                path.pos.1 + next_dir.col_inc() * (moves as i32),
+                            );
+                            if is_valid(new_pos, grid) {
+                                heap.push(Path {
+                                    cost: path.cost
+                                        + (1..moves + 1)
+                                            .map(|i| {
+                                                grid[(path.pos.0 + next_dir.row_inc() * i as i32)
                                                     as usize]
-                                        })
-                                        .sum::<u32>(),
-                                pos: new_pos,
-                                dir: next_dir,
-                                dir_cnt: min_moves,
-                            })
-                        }
+                                                    [(path.pos.1 + next_dir.col_inc() * i as i32)
+                                                        as usize]
+                                            })
+                                            .sum::<u32>(),
+                                    pos: new_pos,
+                                    dir: next_dir,
+                                    dir_cnt: min_moves,
+                                })
+                            }
+                        });
                     }
                 });
         }
