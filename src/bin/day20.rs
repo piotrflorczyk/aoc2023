@@ -163,7 +163,7 @@ fn load_input() -> (HashMap<String, Module>, HashMap<String, ModuleState>) {
 
 fn p1() {
     let (modules_map, mut modules_states) = load_input();
-    let mut signal_counts = vec![0; 2];
+    let mut signal_counts = [0; 2];
     (0..1000).for_each(|_| {
         simulate_button_press(&modules_map, &mut modules_states, |sig| {
             signal_counts[sig.sig as usize] += 1;
