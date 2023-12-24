@@ -147,7 +147,6 @@ fn p2() {
     println!("p2: {max_path}");
 
     // dfs2
-
     let mut max_path = 0;
     let mut queue = vec![(start, HashSet::new(), 0)];
     while let Some((v, mut visited, path_len)) = queue.pop() {
